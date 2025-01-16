@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.12.35527.113 d17.12
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GoneGhost", "GoneGhost\GoneGhost.vcxproj", "{13394D21-22C2-43FA-8FB5-790EB51476F2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Install", "GoneGhost\GoneGhost.vcxproj", "{13394D21-22C2-43FA-8FB5-790EB51476F2}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "x64DLL", "x64DLL\x64DLL.vcxproj", "{57382CE1-1B87-4673-9121-E3DFB7330E76}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,14 @@ Global
 		{13394D21-22C2-43FA-8FB5-790EB51476F2}.Release|x64.Build.0 = Release|x64
 		{13394D21-22C2-43FA-8FB5-790EB51476F2}.Release|x86.ActiveCfg = Release|Win32
 		{13394D21-22C2-43FA-8FB5-790EB51476F2}.Release|x86.Build.0 = Release|Win32
+		{57382CE1-1B87-4673-9121-E3DFB7330E76}.Debug|x64.ActiveCfg = Debug|x64
+		{57382CE1-1B87-4673-9121-E3DFB7330E76}.Debug|x64.Build.0 = Debug|x64
+		{57382CE1-1B87-4673-9121-E3DFB7330E76}.Debug|x86.ActiveCfg = Debug|Win32
+		{57382CE1-1B87-4673-9121-E3DFB7330E76}.Debug|x86.Build.0 = Debug|Win32
+		{57382CE1-1B87-4673-9121-E3DFB7330E76}.Release|x64.ActiveCfg = Release|x64
+		{57382CE1-1B87-4673-9121-E3DFB7330E76}.Release|x64.Build.0 = Release|x64
+		{57382CE1-1B87-4673-9121-E3DFB7330E76}.Release|x86.ActiveCfg = Release|Win32
+		{57382CE1-1B87-4673-9121-E3DFB7330E76}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
