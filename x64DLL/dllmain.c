@@ -115,9 +115,8 @@ VOID InstallHook(LPCSTR dll, LPCSTR function, LPVOID* originalFunction, LPVOID h
 
 }
 
-VOID Unhook(LPCSTR dll, LPCSTR function, LPVOID* originalFunction, LPVOID hookedFunction) {
+VOID Unhook(LPVOID* originalFunction, LPVOID hookedFunction) {
 
-    *originalFunction = GetProcAddress(GetModuleHandle(dll), function);
     if (*originalFunction)
         DetourDetach(originalFunction, hookedFunction);
 
@@ -136,7 +135,7 @@ VOID UninitializeHooks() {
 
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
-    Unhook("ntdll.dll", "NtQuerySystemInformation", (LPVOID)&g_NtQuerySystemInformation, MyNtQuerySystemInformation);
+    Unhook((LPVOID)&g_NtQuerySystemInformation, MyNtQuerySystemInformation);
     DetourTransactionCommit();
 
 }
