@@ -20,23 +20,6 @@ fnNtQueryDirectoryFileEx g_NtQueryDirectoryFileEx;
 
 /* ------------------------------------------------------------------------------------------------------ */
 
-BOOL CompareToFileName(PFILE_ID_BOTH_DIR_INFO pFileIdBothDirInfo, const char* fileName) {
-
-    ANSI_STRING as = { 0 };
-    UNICODE_STRING EntryName = { 0 };
-    EntryName.MaximumLength = EntryName.Length = (USHORT)pFileIdBothDirInfo->FileNameLength;
-    EntryName.Buffer = &pFileIdBothDirInfo->FileName[0];
-    g_RtlUnicodeStringToAnsiString(&as, &EntryName, TRUE);
-
-    if (strcmp(as.Buffer, fileName) == 0) {
-        return TRUE;
-    }
-    else {
-        return FALSE;
-    }
-
-    return TRUE;
-}
 
 NTSTATUS MyNtQuerySystemInformation(SYSTEM_INFORMATION_CLASS SystemInformationClass, PVOID SystemInformation, ULONG SystemInformationLength, PULONG ReturnLength) {
     NTSTATUS stat = g_NtQuerySystemInformation(SystemInformationClass, SystemInformation, SystemInformationLength, ReturnLength);
@@ -213,3 +196,20 @@ BOOL WINAPI DllMain(HINSTANCE hModule, DWORD  fdwReason, LPVOID lpReserved) {
     return TRUE;
 }
 
+BOOL CompareToFileName(PFILE_ID_BOTH_DIR_INFO pFileIdBothDirInfo, const char* fileName) {
+
+    ANSI_STRING as = { 0 };
+    UNICODE_STRING EntryName = { 0 };
+    EntryName.MaximumLength = EntryName.Length = (USHORT)pFileIdBothDirInfo->FileNameLength;
+    EntryName.Buffer = &pFileIdBothDirInfo->FileName[0];
+    g_RtlUnicodeStringToAnsiString(&as, &EntryName, TRUE);
+
+    if (strcmp(as.Buffer, fileName) == 0) {
+        return TRUE;
+    }
+    else {
+        return FALSE;
+    }
+
+    return TRUE;
+}
