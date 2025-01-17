@@ -136,6 +136,7 @@ VOID UninitializeHooks() {
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
     Unhook((LPVOID)&g_NtQuerySystemInformation, MyNtQuerySystemInformation);
+    Unhook((LPVOID)&g_NtQueryDirectoryFile, MyNtQueryDirectoryFile);
     DetourTransactionCommit();
 
 }
