@@ -1,10 +1,10 @@
 # Current task
 
-Need to work on unloading the dll's without crashing the process. 
+add registry key hiding
 
 # Next up
 
-add registry key hiding, also hook NtQueryDirectoryEx.
+
 
 # Later date
 
