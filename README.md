@@ -8,4 +8,4 @@ add registry key hiding
 
 # Later date
 
-Should change injection to be RflDllInjection.
+- Reflective dll injection
