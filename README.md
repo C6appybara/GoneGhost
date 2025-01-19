@@ -1,6 +1,6 @@
 # Current task
 
-add registry key hiding
+Add registry key hiding
 
 # Next up
 
