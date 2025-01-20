@@ -1,10 +1,10 @@
 # Current task
-**Work on evasive payload injector:**
-  - Shellcode Reflective dll injection.
-  - Indirect syscalls. 
-  - Malware compiling + CRT Removal
-  - `if needed` api hashing
-  - String hashing
+**Work on evasive payload injector:** 
+  1. [Shellcode Reflective dll injection.](https://maldevacademy.com/new/modules/43?query=Reflective%20dll&view=blocks)
+  2. Indirect syscalls. 
+  3. Malware compiling + CRT Removal
+  4. `if needed` api hashing
+  5. String hashing
 
 # Next up
 
