@@ -39,3 +39,21 @@ typedef NTSTATUS (NTAPI *fnNtQueryDirectoryFileEx)(
     _In_ ULONG QueryFlags,
     _In_opt_ PUNICODE_STRING FileName
 );
+
+typedef NTSTATUS (NTAPI *fnNtEnumerateKey)(
+    _In_ HANDLE KeyHandle,
+    _In_ ULONG Index,
+    _In_ NT_KEY_INFORMATION_CLASS KeyInformationClass,
+    _Out_writes_bytes_to_opt_(Length, *ResultLength) PVOID KeyInformation,
+    _In_ ULONG Length,
+    _Out_ PULONG ResultLength
+);
+
+typedef NTSTATUS(NTAPI* fnNtEnumerateValueKey)(
+    HANDLE key, 
+    ULONG index, 
+    NT_KEY_VALUE_INFORMATION_CLASS keyValueInformationClass, 
+    LPVOID keyValueInformation, 
+    ULONG keyValueInformationLength, 
+    PULONG resultLength
+);

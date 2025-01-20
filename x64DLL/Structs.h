@@ -1,7 +1,41 @@
 #pragma once
 
-#pragma once
+typedef struct _NT_KEY_BASIC_INFORMATION
+{
+    LARGE_INTEGER LastWriteTime;
+    ULONG TitleIndex;
+    ULONG NameLength;
+    WCHAR Name[1];
+} NT_KEY_BASIC_INFORMATION, * PNT_KEY_BASIC_INFORMATION;
 
+typedef enum _NT_KEY_INFORMATION_CLASS
+{
+    KeyBasicInformation,
+    KeyNodeInformation,
+    KeyFullInformation,
+    KeyNameInformation
+} NT_KEY_INFORMATION_CLASS;
+
+typedef enum _NT_KEY_VALUE_INFORMATION_CLASS
+{
+    KeyValueBasicInformation,
+    KeyValueFullInformation,
+    KeyValuePartialInformation
+} NT_KEY_VALUE_INFORMATION_CLASS;
+
+typedef struct _NT_KEY_NAME_INFORMATION
+{
+    ULONG NameLength;
+    WCHAR Name[1];
+} NT_KEY_NAME_INFORMATION, * PNT_KEY_NAME_INFORMATION;
+
+typedef struct _NT_KEY_VALUE_BASIC_INFORMATION
+{
+    ULONG TitleIndex;
+    ULONG Type;
+    ULONG NameLength;
+    WCHAR Name[1];
+} NT_KEY_VALUE_BASIC_INFORMATION, * PNT_KEY_VALUE_BASIC_INFORMATION;
 
 //
 // Strings

