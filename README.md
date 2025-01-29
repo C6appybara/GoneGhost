@@ -5,7 +5,6 @@
 # Next up
 
   2. Indirect syscalls. 
-  3. Malware compiling + CRT Removal
   4. `if needed` api hashing
   5. String hashing
 
