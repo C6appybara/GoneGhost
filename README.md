@@ -1,6 +1,6 @@
 # Current task
 **Work on evasive payload injector:** 
-  1. [Shellcode Reflective dll injection.](https://maldevacademy.com/new/modules/43?query=Reflective%20dll&view=blocks)
+  1. Shellcode Reflective dll injection.
 
 # Next up
 
