@@ -6,11 +6,11 @@ I have been working on this ring3 rootkit to hide processes, files/folders, regi
 There many more future changes that I want to make but because of my limited time, updates may take some time. 
 
 ## **FEATURES:**
-- [x] Hide processes via `NtQuerySystemInformation` hook.
-- [x] Hide Files/Folder via `NtQueryDirectoryFile` hook. (`NtQueryDirectoryFileEx` needs some work.)
-- [x] Hide registry keys from the registry via `NtEnumerateKey` and `NtEnumerateValueKey` hook.
-- [x] Using detours hooking library to hook these functions.
-- [x] Hiding files, folders, registry keys, and processes with prefix.
+- ✅ Hide processes via `NtQuerySystemInformation` hook.
+- ✅ Hide Files/Folder via `NtQueryDirectoryFile` hook. (`NtQueryDirectoryFileEx` needs some work.)
+- ✅ Hide registry keys from the registry via `NtEnumerateKey` and `NtEnumerateValueKey` hook.
+- ✅ Using detours hooking library to hook these functions.
+- ✅ Hiding files, folders, registry keys, and processes with prefix.
 
 # Current task
   2. Indirect syscalls. 
