@@ -3,7 +3,7 @@
 
 ### Description
 I have been working on this ring3 rootkit to hide processes, files/folders, registry keys and more. I have took inspiration from **@bytecode77** for his r77 rootkit.
-There many more future changes that I want to make but because of my limited time, updates may take some time. 
+There many more future changes that I want to make but because of my limited time, updates may take some time. **I am still a new Malware Dev so expect bugs and issues!!**
 
 ## **FEATURES:**
 - ✅ **Hide processes via `NtQuerySystemInformation` hook.**
