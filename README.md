@@ -5,11 +5,15 @@
 I have been working on this ring3 rootkit to hide processes, files/folders, registry keys and more. I have took inspiration from **@bytecode77** for his r77 rootkit.
 There many more future changes that I want to make but because of my limited time, updates may take some time. 
 
+## **FEATURES:**
+- [x] Hide processes via `NtQuerySystemInformation` hook.
+- [x] Hide Files/Folder via `NtQueryDirectoryFile` hook. (`NtQueryDirectoryFileEx` needs some work.)
+- [x] Hide registry keys from the registry via `NtEnumerateKey` and `NtEnumerateValueKeyEx` 
+
 # Current task
   2. Indirect syscalls. 
   4. `if needed` api hashing
   5. String hashing
-
 
 # Next up
 
