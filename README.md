@@ -8,7 +8,9 @@ There many more future changes that I want to make but because of my limited tim
 ## **FEATURES:**
 - [x] Hide processes via `NtQuerySystemInformation` hook.
 - [x] Hide Files/Folder via `NtQueryDirectoryFile` hook. (`NtQueryDirectoryFileEx` needs some work.)
-- [x] Hide registry keys from the registry via `NtEnumerateKey` and `NtEnumerateValueKeyEx` 
+- [x] Hide registry keys from the registry via `NtEnumerateKey` and `NtEnumerateValueKey` hook.
+- [x] Using detours hooking library to hook these functions.
+- [ ] 
 
 # Current task
   2. Indirect syscalls. 
