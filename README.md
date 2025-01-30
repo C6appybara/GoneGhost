@@ -10,7 +10,7 @@ There many more future changes that I want to make but because of my limited tim
 - [x] Hide Files/Folder via `NtQueryDirectoryFile` hook. (`NtQueryDirectoryFileEx` needs some work.)
 - [x] Hide registry keys from the registry via `NtEnumerateKey` and `NtEnumerateValueKey` hook.
 - [x] Using detours hooking library to hook these functions.
-- [ ] 
+- [x] Hiding files, folders, registry keys, and processes with prefix.
 
 # Current task
   2. Indirect syscalls. 
