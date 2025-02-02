@@ -1,10 +1,10 @@
 #include <stdio.h>
 
-int main(void) {
+int main( void )
+{
+	PRINTA( "Hello User...\n" );
 
-	printf("Hello User...\n");
-
-	printf("\n(#) Press [ENTER] To Quit...\n");
+	PRINTA( "\n(#) Press [ENTER] To Quit...\n" );
 	getchar();
 
 	return 0;

@@ -147,7 +147,6 @@
     <ClCompile Include="GGWin.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Debug.h" />
     <ClInclude Include="GGdef.h" />
     <ClInclude Include="GGWin.h" />
     <ClInclude Include="Structs.h" />

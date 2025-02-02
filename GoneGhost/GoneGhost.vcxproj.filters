@@ -18,5 +18,11 @@
     <ClCompile Include="Main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="WinApi.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WinApi.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
